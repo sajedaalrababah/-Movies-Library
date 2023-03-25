@@ -3,12 +3,28 @@ const express = require("express");
 const cors = require("cors");
 const axios=require('axios');
 const movieData= require('./data.json')
+const bodyParser = require("body-parser");
+const {Client} = require("pg")
+
+const url=process.env.url
+
+const client = new Client(url)
+
 const app = express();
+app.use(cors());
+app.use(bodyParser.urlencoded({extended :false}));
+app.use(bodyParser.json());
 
 require('dotenv').config();
-app.use(cors());
+
 const api_key=process.env.api_key
 const PORT =process.env.PORT;
+
+// app.use(bodyParser.urlencoded({extended :false}));
+// app.use(bodyParser.json());
+
+
+
 
 app.get("/", handleFirstRoute);
 app.get("/favorite", handleFavoritePage);
@@ -16,6 +32,8 @@ app.get("/trending", handleTrending);
 app.get("/search", handleSearch);
 app.get("/discover", handleDiscover);
 app.get("/changes", handleChanges);
+app.post("/addMovie",handleAdd);
+app.get("/getMovies", handleGet)
 app.get('/example',errorHandler2)
 app.use("*", handleNtFoundError)
 
@@ -104,7 +122,30 @@ function handleChanges(req, res) {
         })
 }
 
+function handleAdd(req, res) {
+    console.log(req.body);
 
+    let {title, id, overview} = req.body;
+
+    let sql =`INSERT INTO MOVIE(title,id,overview) VALUES($1,$2,$3) RETURNING *`;
+    let values = [title, id, overview];
+    client.query(sql, values).then((result)=> {
+        console.log(result);
+        return res.json(result.rows);
+    }).catch();
+
+}
+
+function handleGet(req, res) {
+    let sql = "SELECT * from MOVIE";
+
+    client.query(sql).then((result)=> {
+        console.log(result);
+        return res.json(result);
+    }).catch(
+        res.status(500).send("error")
+    );
+}
 
 
 function MovieDa(id, title, release_date, poster_path, overview) {
@@ -129,12 +170,17 @@ function MovieDa(id, title, release_date, poster_path, overview) {
 
 
 
+client.connect().then(() => {
+
+    app.listen(PORT, () => {
+        console.log(`Example app listening on port ${PORT}`)
+      })
+    
+})
 
 
 
-app.listen(PORT, () => {
-    console.log(`Example app listening on port ${PORT}`)
-  })
+
 
 
 
