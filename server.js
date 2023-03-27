@@ -36,6 +36,9 @@ app.get("/discover", handleDiscover);
 app.get("/changes", handleChanges);
 app.post("/addMovie",handleAdd);
 app.get("/getMovie", handleGet)
+app.put("/UPDATE/:id", handleUpdate);
+app.delete("/DELETE/:id", handleDelete);
+app.get("/getMovie/:id", handleID);
 app.get('/example',errorHandler2)
 app.use("*", handleNtFoundError)
 
@@ -147,6 +150,48 @@ function handleGet(req, res) {
     }).catch(
     );
 }
+
+function handleUpdate(req, res){
+   let movieId= req.param.id;
+    let {title, id, overview} = req.body;
+
+    let sql =`UPDATE movie SET title=$1, id=$2, overview=$3 WHERE id=$4 RETURNING * ;`;
+    let values = [title, id, overview,movieId];
+    client.query(sql, values).then((result)=> {
+        console.log(result);
+        res.json(result.rows);
+    }).catch();
+}
+
+
+
+function handleDelete(req, res){
+  let movieId= req.params.id;
+
+    let sql =`DELETE FROM movie WHERE id=$1;`;
+    let values = [movieId];
+    client.query(sql, values).then((result)=> {
+        
+         res.status(204).send("deleted");
+    }).catch();
+}
+
+function handleID(req, res){
+    let id =req.params.id 
+    let sql = `SELECT * from movie WHERE id=$1`;
+    let values =[id];
+    client.query(sql,values).then((result)=> {
+        console.log(result);
+        res.json(result.rows);
+    }).catch(
+    );
+}
+
+
+
+
+
+
 
 
 function MovieDa(id, title, release_date, poster_path, overview) {
