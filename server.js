@@ -155,8 +155,8 @@ function handleUpdate(req, res){
    let movieId= req.param.id;
     let {title, id, overview} = req.body;
 
-    let sql =`UPDATE movie SET title=$1, id=$2, overview=$3 WHERE id=$4 RETURNING * ;`;
-    let values = [title, id, overview,movieId];
+    let sql =`UPDATE movie SET movieName=$1, id=$2, overview=$3 ,comment=$4 WHERE id=$5 RETURNING * ;`;
+    let values = [movieName, id, overview,comment,movieId];
     client.query(sql, values).then((result)=> {
         console.log(result);
         res.json(result.rows);
