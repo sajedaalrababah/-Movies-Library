@@ -1,29 +1,28 @@
 'use strict';
 const express = require("express");
-const cors = require("cors");
-require('dotenv').config();
-
-const axios=require('axios');
-const movieData= require('./data.json')
-const bodyParser = require("body-parser");
-const {Client} = require("pg")
-
-const url=process.env.url
-
-const client = new Client(url)
-
 const app = express();
+const movieData= require('./data.json')
+const cors = require("cors");
+const axios=require('axios');
+require('dotenv').config();
 app.use(cors());
-app.use(bodyParser.urlencoded({extended :false}));
-app.use(bodyParser.json());
-
-;
-
 const api_key=process.env.api_key
 const PORT =process.env.PORT;
 
-// app.use(bodyParser.urlencoded({extended :false}));
-// app.use(bodyParser.json());
+
+
+const bodyParser = require("body-parser");
+app.use(bodyParser.urlencoded({extended :false}));
+app.use(bodyParser.json());
+
+const {Client} = require("pg")
+const url=process.env.url
+const client = new Client(url)
+
+
+
+
+
 
 
 
@@ -130,10 +129,10 @@ function handleChanges(req, res) {
 function handleAdd(req, res) {
     console.log(req.body);
 
-    let {title,id,overview} = req.body;
+    let {moviename,overview,comment} = req.body;
 
-    let sql =`INSERT INTO "movie"(title,id,overview) VALUES($1,$2,$3) RETURNING *`;
-    let values = [title,id,overview];
+    let sql =`INSERT INTO "movie"(moviename,overview,comment) VALUES($1,$2,$3) RETURNING *`;
+    let values = [moviename,overview,comment];
     client.query(sql, values).then((result)=> {
         console.log(result);
         res.status(201).json(result.rows);
@@ -153,13 +152,13 @@ function handleGet(req, res) {
 
 function handleUpdate(req, res){
    let movieId= req.param.id;
-    let {title, id, overview} = req.body;
+    let {moviename, overview,comment} = req.body;
 
-    let sql =`UPDATE movie SET movieName=$1, id=$2, overview=$3 ,comment=$4 WHERE id=$5 RETURNING * ;`;
-    let values = [movieName, id, overview,comment,movieId];
-    client.query(sql, values).then((result)=> {
+    let sql =`UPDATE movie SET moviename=$1,overview=$2,comment=$3 WHERE id=$4 RETURNING * ;`;
+    let values = [moviename, overview,comment,movieId];
+    client.query(sql,values).then((result)=> {
         console.log(result);
-        res.json(result.rows);
+        res.send("updated");
     }).catch();
 }
 
