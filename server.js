@@ -151,14 +151,14 @@ function handleGet(req, res) {
 }
 
 function handleUpdate(req, res){
-   let movieId= req.param.id;
+   let movieId= req.params.id;
     let {moviename, overview,comment} = req.body;
 
     let sql =`UPDATE movie SET moviename=$1,overview=$2,comment=$3 WHERE id=$4 RETURNING * ;`;
-    let values = [moviename, overview,comment,movieId];
+    let values = [moviename,overview,comment,movieId];
     client.query(sql,values).then((result)=> {
         console.log(result);
-        res.send("updated");
+        res.json(result.rows)
     }).catch();
 }
 
